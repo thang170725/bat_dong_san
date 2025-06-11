@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dự đoán Giá Bất Động Sản</title>
+    <link rel="icon" href="./image/icon_bds.jpg">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div>
+        <h3>AI Dự Đoán Giá Bất Động Sản tại Hà Nội</h3>
+        <hr>
+        <div class="content">
+            <select name="dia_diem" id="">
+                <option value="">Ba Đình</option>
+                <option value="" >Bắc Từ liêm</option>
+            </select> 
+            <input type="number" id="so_phong_ngu" placeholder="số phòng ngủ">
+            <input type="number" id="dien_tich" placeholder="diện tích /m2">
+            <select name="loai_nha" id="">
+                <option value="">Nhà mặt đất</option>
+                <option value="">Chung cư</option>
+                <option value="">khác</option>
+            </select>
+            <select name="giay_to_phap_ly" id="">
+                <option value="so_do">Sổ Đỏ</option>
+                <option value="">Sổ hồng</option>
+                <option value="khac">Khác</option>
+            </select>
+            <select name="khung_canh" id="">
+                <option value="hem_ngo">Hẻm ngõ</option>
+                <option value="duong_lon">Đường lớn</option>
+                <option value="anh_ho">Cạnh hồ</option>
+            </select>
+            <input type="number" id="mat_tien" placeholder="mặt tiền /m2">
+            <select name="tinh_trang_nha" id="">
+                <option value="moi">Mới</option>
+                <option value="cu">Cũ</option>
+            </select>
+            <input type="number" id="tang" placeholder="số tầng">
+        </div>
+
+        <div class="result">
+            <div>
+                <span>Giá dự đoán: </span>
+                <p style="margin-top: 2em;">3.2<span> Tỷ đồng</span></p>
+            </div>
+            <div>
+                <span>Đặc điểm ảnh hưởng tới giá nhiều nhất: </span>
+                <p style="margin-top: 2em;"></p>
+            </div>
+        </div>
+    </div>
+
+    
+</body>
+</html>
