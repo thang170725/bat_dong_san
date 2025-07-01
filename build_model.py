@@ -1,107 +1,135 @@
-#from connection import fetch_dataframe
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score
 import numpy as np
-def train_test_encoder(df):
-    # thêm tập dữ liệu
-    #query = 'SELECT * FROM bat_dong_san;'
-    #df = fetch_dataframe(query)
 
-    # mã hóa bằng one-hot encoding
-    one_hot = pd.get_dummies(data=df, columns=['dia_diem', 'loai_nha', 'giay_to_phap_ly', 'vi_tri', 'mo_ta'], prefix="encode", dtype=int) 
+class HousePricePredictor_v1:
+    def __init__(self):
+        self.le = LabelEncoder()
+        self.feature_columns = []
+        self.scaler = StandardScaler()
+        self.model = None
 
-    # sử dụng label encoding
-    le = LabelEncoder()
-    one_hot['encode_tinh_trang_nha'] = le.fit_transform(one_hot['tinh_trang_nha'])
+    def preprocess(self, df):
+        # lưu lại cột dia_diem trước khi one-hot để stratify
+        stratify_col = df['dia_diem'].copy()
 
-    # bỏ cột tinh_trang_nha và cột id
-    one_hot = one_hot.drop('tinh_trang_nha', axis=1)
+        # One-hot encode
+        df_encoded = pd.get_dummies(data=df, columns=[
+            'dia_diem', 'loai_nha', 'giay_to_phap_ly',
+            'vi_tri', 'mat_tien', 'mo_ta'
+        ], prefix="encode", dtype=int) 
 
-    # chia tập dữ liệu - features/label
-    X = one_hot.drop('gia', axis=1) 
-    y = one_hot['gia']
+        # Label encode
+        df_encoded['encode_tinh_trang_nha'] = self.le.fit_transform(df_encoded['tinh_trang_nha'])
 
-    #train/test
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1 ,random_state=42)
-    feature_columns = X_train.columns.tolist()
-    return X_train, X_test, y_train, y_test, feature_columns, le
+        # bỏ cột tinh_trang_nha
+        df_encoded = df_encoded.drop('tinh_trang_nha', axis=1)
 
-def scaler_data(X_train, X_test):
-    # tính trung bình và chuẩn hóa dữ liệu
-    scaler = StandardScaler()
-    X_train_scaled = scaler.fit_transform(X_train) # tính mean, std trên X_train, rồi chuẩn hóa
-    X_test_scaled = scaler.transform(X_test) # dùng mean, std đã học ở trên để chuẩn hóa X_test
-    #chỉ gọi transform không sử dụng fit lại ở test, điều này tránh rò rỉ thông tin từ test set vào mô hình, rất quan trọng trong thực tế
-    return X_train_scaled, X_test_scaled, scaler
+        # chia tập dữ liệu - features/label
+        X = df_encoded.drop('gia', axis=1) 
+        y = df_encoded['gia']
 
-def container_model(X, y):
-    # huấn luyện mô hình
-    model = LinearRegression()
-    model.fit(X, y)
-    return model
+        #train/test
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y, test_size=0.15, stratify=stratify_col, random_state=42
+        )
+        
+        # Mảng chứa tên các feature
+        self.feature_columns = X_train.columns.tolist()
+        
+        return X_train, X_test, y_train, y_test
 
-def evaluate_model(model, X_test_scaled, y_test):
-    y_pred = model.predict(X_test_scaled)
-    mse = mean_squared_error(y_test, y_pred)
-    r2 = r2_score(y_test, y_pred)
-    return mse, r2
+    def scale(self, X_train, X_test):
+        # tính trung bình và chuẩn hóa dữ liệu
+        # tính mean, std trên X_train, rồi chuẩn hóa
+        X_train_scaled = self.scaler.fit_transform(X_train) 
 
-def new_predict(model, scaler, le, feature_columns, dia_diem, so_phong_ngu, dien_tich, loai_nha, giay_to_phap_ly, vi_tri, mat_tien, tinh_trang_nha, tang, mo_ta):
-    if not hasattr(le, "classes_"):
-        raise ValueError("LabelEncoder chưa được fit.")
-    if not hasattr(scaler, "mean_") or not hasattr(scaler, "scale_"):
-        raise ValueError("StandardScaler chưa được fit.")
+        # dùng mean, std đã học ở trên để chuẩn hóa X_test
+        X_test_scaled = self.scaler.transform(X_test) 
+        # chỉ gọi transform không sử dụng fit lại ở test, 
+        # điều này tránh rò rỉ thông tin từ test set vào mô hình, rất quan trọng trong thực tế
+        return X_train_scaled, X_test_scaled
 
-    input_data = pd.DataFrame([{# tạo dataframe mới với đầu vào 1 dòng dữ liệu
-        'dia_diem': dia_diem,
-        'so_phong_ngu': so_phong_ngu,
-        'dien_tich': dien_tich,
-        'loai_nha': loai_nha,
-        'giay_to_phap_ly': giay_to_phap_ly,
-        'vi_tri': vi_tri,
-        'mat_tien': mat_tien,
-        'tinh_trang_nha': tinh_trang_nha,
-        'tang': tang,
-        'mo_ta': mo_ta
-    }])
+    def train_linear_regression(self, X, y, remove_outlier=True, threshold_scale=1.5):
+        # Huấn luyện mô hình lần đầu
+        model = LinearRegression()
+        model.fit(X, y)
+        y_pred = model.predict(X)
 
-    # sử dụng one-hot encoding cho dự đoán với đặc trưng mới
-    input_data = pd.get_dummies(data=input_data, columns=['dia_diem', 'loai_nha', 'giay_to_phap_ly', 'vi_tri', 'mo_ta'], prefix="encode", dtype=int) 
+        # Tính phần sai số (residuals)
+        residuals = np.abs(y - y_pred)
+        mse = mean_squared_error(y, y_pred)
 
-    # sử dụng label encoding
-    input_data['encode_tinh_trang_nha'] = le.transform(input_data['tinh_trang_nha'])
+        if remove_outlier:
+            # Lọc những dòng có sai số thấp hơn ngưỡng
+            threshold = threshold_scale * mse
+            mask = residuals < threshold
 
-    # bỏ cột tinh_trang_nha và id
-    input_data = input_data.drop('tinh_trang_nha', axis=1) 
+            # Lọc lại X, y rồi huấn luyện mô hình lần 2
+            X_clean = X[mask]
+            y_clean = y[mask]
 
-    # bảo đảm có đủ tất cả các cột như X_train (bù thiếu bằng 0)
-    for col in feature_columns:
-        if col not in input_data.columns:
-            input_data[col] = 0
+            model = LinearRegression()
+            model.fit(X_clean, y_clean)
 
-    # sắp xếp đúng thứ tự cột
-    input_data = input_data[feature_columns]
+            print(f"Removed {len(X) - len(X_clean)} samples with residual > {threshold:.2f}")
+        self.model = model
+        return model
 
-    # chuẩn hóa
-    input_scaled = scaler.transform(input_data)
+    def evaluate(self, X_test_scaled, y_test):
+        y_pred = self.model.predict(X_test_scaled)
+        mse = mean_squared_error(y_test, y_pred)
+        r2 = r2_score(y_test, y_pred)
+        return mse, r2
 
-    print("Input data after scaling:", input_scaled)
+    def predict(self, **kwargs):
+        if self.model is None or not hasattr(self.scaler, "mean_"):
+            raise ValueError("Model hoặc scaler chưa được huấn luyện.")
 
-    predicted_price = model.predict(input_scaled)
+        # Tạo DataFrame input 1 dòng
+        input_df = pd.DataFrame([kwargs])
 
-    print("Model coefficients:", model.coef_)
-    print("Intercept:", model.intercept_)
-    return predicted_price[0]
+        # One-hot encode 
+        input_df = pd.get_dummies(input_df, columns=[
+            'dia_diem', 'loai_nha', 'giay_to_phap_ly', 
+            'vi_tri', 'mat_tien', 'mo_ta'
+        ], prefix="encode", dtype=int)
 
-def top_features(model, feature_name, top_n):
-    coefs = model.coef_
-    sorted_idx = np.argsort(np.abs(coefs))[::-1]
+        # label encoder
+        input_df['encode_tinh_trang_nha'] = self.le.transform(input_df['tinh_trang_nha'])
+        input_df = input_df.drop('tinh_trang_nha', axis=1)
 
-    top = []
-    for i in range(top_n):
-        idx = sorted_idx[i]
-        top.append((feature_name[idx], coefs[idx]))   
-    return top
+        # Loại bỏ cột bị trùng tên
+        input_df = input_df.loc[:, ~input_df.columns.duplicated()]
+
+        # Đảm bảo đủ cột và đúng thứ tự
+        input_df = input_df.reindex(columns=self.feature_columns, fill_value=0)
+
+        # scaler
+        input_scaled = self.scaler.transform(input_df)
+
+        # Debug để kiểm tra
+        print("Input data after scaling:", input_scaled)
+
+        # Dự đoán
+        predicted_price = self.model.predict(input_scaled)
+
+        print("Model coefficients:", self.model.coef_)
+        print("Intercept:", self.model.intercept_)
+        print("Cột input sau chuẩn hóa:", input_df.columns.tolist())
+        print("Số cột:", len(input_df.columns), "vs", len(self.feature_columns))
+
+        return predicted_price[0]
+
+
+    def top_features(self, top_n=5):
+        if self.model is None:
+            raise ValueError("Model chưa được huấn luyện")
+        
+        coefs = self.model.coef_
+        idx = np.argsort(np.abs(coefs))[::-1][:top_n]
+
+        return [(self.feature_columns[i], coefs[i]) for i in idx]

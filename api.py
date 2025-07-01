@@ -5,7 +5,7 @@ import pandas as pd
 import sys
 
 def processing():
-    df = pd.read_csv('./dataset.csv')
+    df = pd.read_csv('dataset/dataset.csv')
 
     X_train, X_test, y_train, y_test, feature_columns, le = build_model.train_test_encoder(df)
 
@@ -16,8 +16,25 @@ def processing():
     mse, r2 = build_model.evaluate_model(model, X_test_scaler, y_test)
     print('mse: ', mse, 'r2: ', r2)
 
-    predict_price = build_model.new_predict(model, scaler, le, feature_columns, 'bac_tu_liem', 2, 78, 'quy_can_ho', 'so_do', 'thuan_tien', 3, 'moi', 1, 'khac')
-    print(predict_price)
+    predict_price = build_model.new_predict(
+        model=model,
+        scaler=scaler,
+        le=le,
+        feature_columns=feature_columns,
+        dia_diem='bac_tu_liem',
+        so_phong_ngu=3,
+        dien_tich=120,
+        loai_nha='can_ho',
+        giay_to_phap_ly='so_do',
+        vi_tri='thuan_tien',
+        mat_tien='khac',
+        tinh_trang_nha='moi',
+        tang=1,
+        mo_ta='khac'
+    )
+    print("Dự đoán giá:", predict_price)
+
+
     
     top_f = build_model.top_features(model, feature_columns, 5)
     print(top_f)
