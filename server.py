@@ -91,5 +91,12 @@ def nhan_du_lieu():
         "top_feature": top_feature_json
     })
 
+# if __name__ == '__main__':
+#     app.run(debug=True)
+
+# Cuối file server.py
 if __name__ == '__main__':
-    app.run(debug=True)
+    import os
+    port = int(os.environ.get("PORT", 5000))  # lấy PORT từ biến môi trường
+    app.run(host='0.0.0.0', port=port)        # chạy trên địa chỉ public
+
