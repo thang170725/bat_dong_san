@@ -1,0 +1,290 @@
+*{
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+  color: #e9e9e9;
+}
+
+body{
+  background-color: #363636;
+}
+
+.app-container {
+  width: 100vw;
+  height: 100vh;
+  background-color: #363636;
+}
+
+/* Header */
+.app-header {
+  display: flex;
+  height: 70px;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 30px;
+  border-bottom: 1px solid #eee;
+  margin: 0px 10px;
+}
+
+.logo {
+  position: relative;
+  overflow: hidden;
+  width: 220px;
+  height: 70px;
+}
+
+.letter-logo1{
+  position: absolute;
+  color: rgb(255, 102, 0);
+  text-shadow: 0 0 3px #fff;
+  font-size: 80px;
+  font-weight: 700;
+  top: -10px;
+  z-index: 2;
+}
+
+.letter-logo2{
+  position: absolute;
+  color: #007bff;
+  text-shadow: 0 0 3px #fff;
+  font-size: 30px;
+  font-weight: 600;
+  left: 16px;
+  top: 34px;
+  z-index: 2;
+}
+
+/* .background-logo{
+  width: 130px;
+  height: 130px;
+  background-color: #d7d7d7;
+  transform: rotate(45deg);
+  position: absolute;
+}
+
+.background-logo1{
+  top: 25px;
+  left: 5px;
+} */
+
+/* .background-logo2{
+  top: 27px;
+  left: 60px;
+} */
+
+.auth-links{
+  display: flex;
+  width: 200px;
+  height: 50px;
+  justify-content: center;
+  align-items: center;
+}
+
+.auth-links div{
+  display: flex;
+  width: 100px;
+  height: 50px;
+  font-size: 20px;
+  font-weight: 600;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: all .5s;
+}
+
+.login:hover{
+  color:#009c82;
+  border-right: 1px solid #009c82;
+  transition: all .5s;
+}
+
+.logup:hover{
+  color:#009c82;
+  border-left: 1px solid #009c82;
+  transition: all .5s;
+}
+
+/* Main Title Section */
+.main-title-section {
+  position: relative;
+  width: 100vw;
+  height: 130px;
+  text-align: center;
+}
+
+.main-heading {
+  position: absolute;
+  top: 25px;
+  left: 20%;
+  font-size: 34px;
+  margin-bottom: 10px;
+}
+
+.sub-heading {
+  position: absolute;
+  left: 55.5%;
+  top: 60px;
+  font-size: 18px;
+  color: #666;
+}
+
+/* Content Area */
+.content-area {
+  display: flex;
+  width: 100vw;
+  height: 80vh;
+  justify-content: space-between;
+}
+
+/* Sidebar Navigation */
+.sidebar {
+  width: 15vw;
+  /* border-right: 1px solid #ddd; */
+}
+
+.option{
+  font-size: 20px;
+  padding: 15px 5px;
+  text-align: center;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.5s;
+}
+
+.option:hover{
+  background-color: #009c82;
+  color: #e0f7fa;
+}
+
+/* Support Content Area */
+.box-option{
+  display: inline-block;
+  width: 15vw;
+  height: 80vh;
+  overflow: scroll;
+  border-right: 1px solid #cdcaca;
+}
+
+.list-option{
+  text-align: center;
+}
+
+.list-option div{
+  font-size: 16px;
+  padding: 15px 5px;
+  transition: all .5s;
+  cursor: pointer;
+}
+
+.list-option div:hover{
+  background-color: #009c82;
+  color: #e0f7fa;
+}
+
+.list-option input{
+  width: 8vw;
+  height: 45px;
+  font-size: 16px;
+  margin: 15px;
+  border-radius: 10px;
+}
+
+/* Content box */
+.content-box{
+  width: 70vw;
+  height: 80vh;
+  display: grid;
+  grid-template-columns: 35vw 35vw;
+  grid-template-rows: 40vh 40vh;
+}
+
+/* Main Content Area */
+.main-content{
+  width: 35vw;
+  height: 40vh;
+  border-right: 1px solid #cdcaca;
+}
+
+.main-content > h3{
+  text-align: center;
+  margin: 10px;
+  font-size: 20px;
+}
+
+.main-content p {
+  padding: 0 10px;
+}
+
+/* Note */
+.note{
+  width: 35vw;
+  height: 40vh;
+}
+
+.note > strong{
+  display: block;
+  text-align: center;
+  margin: 10px;
+  font-size: 20px;
+}
+
+/* Result */
+.box-result{
+  width: 70vw;
+  height: 40vh;
+  margin-left: 2px;
+  box-shadow: 0 0 10px #555;
+  display:flex;
+}
+
+.price{
+  padding: 15px 10px;
+}
+
+.content-result{
+  width: 35vw;
+  height: 40vh;
+  border-right: 1px solid #cdcaca;
+}
+
+
+.content-result > button{
+  font-size: 30px;
+  padding: 5px 15px;
+  cursor: pointer;
+  transition: all 0.7s;
+  background-color: #363636;
+}
+
+.content-result > button:hover {
+  background-color: #009c82;
+  opacity: .8;
+  color: #e9e9e9;
+}
+
+.content-result > div{
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.box-feature{
+  width: 35.3vw;
+  height: 40vh;
+}
+
+.box-feature > h3{
+  font-size: 26px;
+  margin: 10px 15px;
+}
+
+.top-feature {
+  width: 30vw;
+  height: 30vh;
+  border-radius: 15px;
+}
+
+.top-feature div {
+  margin: 15px;
+  padding-top: 15px;
+}
