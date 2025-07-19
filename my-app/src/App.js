@@ -436,7 +436,7 @@ function App() {
 
   const handleSubmit = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/du-lieu', {
+      const response = await fetch('https://bat-dong-san-3.onrender.com/api/du-lieu', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
