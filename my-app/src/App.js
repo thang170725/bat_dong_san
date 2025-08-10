@@ -551,8 +551,8 @@ function App() {
         setShowDiv(false);            // Ẩn sau 2 giây
       }, 2000);
   
-      // const response = await fetch('https://bat-dong-san-3.onrender.com/api/du-lieu', {
-      const response = await fetch('http://127.0.0.1:5000/api/du-lieu', {  
+      const response = await fetch('https://bat-dong-san-3.onrender.com/api/du-lieu', {
+      // const response = await fetch('http://127.0.0.1:5000/api/du-lieu', {  
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
