@@ -1,41 +1,27 @@
-import React, {useState} from 'react';
+import React, {useState,  useEffect}  from 'react';
 import './App.css'; // Assuming you'll put the CSS in App.css
+import { FaEye } from "react-icons/fa";
 
-function Header() {
-  return (
-    <header className="app-header">
-      <div className="logo">
-        <span className="letter-logo1">T</span>
-        <span className="letter-logo2">com.AI</span>
-        {/* <div className="background-logo background-logo1"></div>
-        <div className="background-logo background-logo2"></div> */}
-      </div>
-
-      <nav className="auth-links">
-        <div className="login">Login</div>
-        <div className="logup">Logup</div>
-      </nav>
-    </header>
-  );
-}
-
-function MainTitle() {
-  return (
-    <div className="main-title-section">
-      <h1 className="main-heading">DỰ ĐOÁN GIÁ BẤT ĐỘNG SẢN BẰNG AI</h1>
-      <p className="sub-heading">GIAO DIỆN PHẾ NHƯNG KẾT QUẢ KHÔNG PHẾ !!</p>
-    </div>
-  );
-}
-
+// = = = = = = = = =
+// Giao diện bên trái
+// = = = = = = = = =
 function SidebarNavigation({onSelectOption}) {
   return (
     <div className="sidebar">
+      <div className="logo">
+        <span className="letter-logo1">T</span>
+        <span className="letter-logo2">com.AI</span>
+      </div>
+
+      <div class="main-option">
       <div className="option" onClick={()=>onSelectOption("dia-diem")}>
         Địa Điểm
       </div>
       <div className="option" onClick={()=>onSelectOption("so-phong-ngu")}>
         Số phòng ngủ
+      </div>
+      <div className="option" onClick={()=>onSelectOption("so-phong-ve-sinh")}>
+        Số phòng vệ sinh
       </div>
       <div className="option" onClick={()=>onSelectOption("dien-tich")}>
         Diện Tích
@@ -60,10 +46,53 @@ function SidebarNavigation({onSelectOption}) {
       </div>
       <div className="option" onClick={()=>onSelectOption("mo-ta")}>
         Mô Tả
-      </div>     
+      </div>   
+      <div className="option" onClick={()=>onSelectOption("huong-nha")}>
+        Hướng nhà
+      </div>   
+         </div>
     </div>
   );
 }
+
+// = = = = = = = = =
+// Giao diện bên phải
+// = = = = = = = = =
+function VisitorCounter() {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    // Giả lập API: mỗi lần load trang sẽ cộng thêm 1
+    let storedCount = localStorage.getItem("visitorCount");
+    storedCount = storedCount ? parseInt(storedCount) + 1 : 1;
+    localStorage.setItem("visitorCount", storedCount);
+    setCount(storedCount);
+  }, []);
+
+  return (
+    <div 
+      className="eye flex items-center gap-2 text-white bg-gray-800 px-4 py-2 rounded-full shadow-md">
+      <FaEye className="text-yellow-400 text-xl" />
+      <span className="text-lg font-semibold">{count.toLocaleString()}</span>
+    </div>
+  );
+}
+
+// phần header
+function Header() {
+  return (
+    <header className="app-header">
+      <VisitorCounter />
+
+      <nav className="auth-links">
+        <div className="login">Login</div>
+        <div className="logup">Logup</div>
+      </nav>
+    </header>
+  );
+}
+
+
 
 function toSnakeCaseVN(str) {
   str = String(str);
@@ -79,9 +108,7 @@ function SupportContent({selected, updateData, setNote}){
   if (!selected) {
     return (
       <div className="box-option">
-        <div className="list-option">
-          <p>Chọn một tuỳ chọn ở bên trái để nhập dữ liệu.</p>
-        </div>
+        <div className="list-option"></div>
       </div>
     );
   }
@@ -108,7 +135,7 @@ function SupportContent({selected, updateData, setNote}){
       "Mê Linh",
       "Mỹ Đức",
       "Phú Xuyên",
-      "PHúc Thọ",
+      "Phúc Thọ",
       "Quốc Oai",
       "Sóc Sơn",
       "Thạch Thất",
@@ -123,10 +150,27 @@ function SupportContent({selected, updateData, setNote}){
       <div className="box-option">
         <div className="list-option">
           {list.map((label, i) => (
-            <div key={i} onClick={() => updateData("dia_diem", {
-              label: label,
-              value: toSnakeCaseVN(label)
-            })}>
+            <div 
+              key={i} 
+              onClick={() => {
+                updateData("dia_diem", {
+                  label: label,
+                  value: toSnakeCaseVN(label)             
+                });
+
+                let note = "";
+
+                if(label){
+                  note =
+                    "Giá trị bất động sản được sắp xếp theo thứ tự khu vực càng gần nội thành giá càng cao.\n"
+                }
+
+                // gọi hàm hiển thị note
+                if (note){
+                  setNote(note);
+                }
+              }}
+            >
               {label}
             </div>
           ))}          
@@ -353,24 +397,38 @@ function SupportContent({selected, updateData, setNote}){
   return null;
 }
 
+// Phần tiêu đề
+function Title(){
+  return (
+    <div className="main-heading">
+      <h1 className="main-heading1">AI</h1>
+      <h1 className="main-heading2">DỰ ĐOÁN GIÁ TRỊ BẤT ĐỘNG SẢN</h1>
+    </div>
+  )
+}
+
 // Component hiển thị các lựa chọn đã chọn
 function MainContent({ selectedData }) {
   return (
     <div className="main-content">
       <h3>Lựa chọn của bạn:</h3>
-      {selectedData.dia_diem && <p><strong>Địa Điểm:</strong> {selectedData.dia_diem.label}</p>}
-      {selectedData.so_phong_ngu && <p><strong>Số phòng ngủ:</strong> {selectedData.so_phong_ngu.label}</p>}      
-      {selectedData.dien_tich && <p><strong>Diện tích:</strong> {selectedData.dien_tich.label} m²</p>}
-      {selectedData.loai_nha && <p><strong>Loại nhà:</strong> {selectedData.loai_nha.label}</p>}
-      {selectedData.giay_to_phap_ly && <p><strong>Giấy tờ pháp lý:</strong> {selectedData.giay_to_phap_ly.label}</p>}
-      {selectedData.vi_tri && <p><strong>Vị trí:</strong> {selectedData.vi_tri.label}</p>}
-      {selectedData.mat_tien && <p><strong>Mặt tiền:</strong> {selectedData.mat_tien.label}</p>}
-      {selectedData.tinh_trang_nha && <p><strong>Tình trạng nhà:</strong> {selectedData.tinh_trang_nha.label}</p>}
-      {selectedData.tang && <p><strong>Số tầng:</strong> {selectedData.tang.label}</p>}
-      {selectedData.mo_ta && <p><strong>Mô tả:</strong> {selectedData.mo_ta.label}</p>}
+      <div>
+        <div>
+          {selectedData.dia_diem && <p><strong>Địa Điểm:</strong> {selectedData.dia_diem.label}</p>}
+          {selectedData.so_phong_ngu && <p><strong>Số phòng ngủ:</strong> {selectedData.so_phong_ngu.label}</p>}      
+          {selectedData.dien_tich && <p><strong>Diện tích:</strong> {selectedData.dien_tich.label} m²</p>}
+          {selectedData.loai_nha && <p><strong>Loại nhà:</strong> {selectedData.loai_nha.label}</p>}
+          {selectedData.giay_to_phap_ly && <p><strong>Giấy tờ pháp lý:</strong> {selectedData.giay_to_phap_ly.label}</p>}
+          {selectedData.vi_tri && <p><strong>Vị trí:</strong> {selectedData.vi_tri.label}</p>}
+          {selectedData.mat_tien && <p><strong>Mặt tiền:</strong> {selectedData.mat_tien.label}</p>}
+          {selectedData.tinh_trang_nha && <p><strong>Tình trạng nhà:</strong> {selectedData.tinh_trang_nha.label}</p>}
+          {selectedData.tang && <p><strong>Số tầng:</strong> {selectedData.tang.label}</p>}
+          {selectedData.mo_ta && <p><strong>Mô tả:</strong> {selectedData.mo_ta.label}</p>}
+          {/* Bạn có thể in ra JSON để gửi về backend */}
+          {/* <pre>{JSON.stringify(selectedData, null, 2)}</pre> */}
+        </div>     
+      </div>
       
-      {/* Bạn có thể in ra JSON để gửi về backend */}
-      {/* <pre>{JSON.stringify(selectedData, null, 2)}</pre> */}
     </div>
   );
 }
@@ -379,46 +437,95 @@ function Note({message}){
   if (!message) {
     return (
     <div className="note">
-      <strong>Ghi chú: </strong> {message}
+      <strong>Ghi chú: </strong>
+      <div>{message}</div> 
     </div>
     );
   };
   return (
     <div className="note">
       <strong>Ghi chú: </strong>
-      {message.split('\n').map((line, index) => (
-        <React.Fragment key={index}>
-          {line}
-          <br />
-        </React.Fragment>
-      ))}
+      <div>
+        {message.split('\n').map((line, index) => (
+          <React.Fragment key={index}>
+            {line}
+            <br />
+          </React.Fragment>
+        ))}
+      </div>     
     </div>
   );
 }
 
-function Result({result, top_feature, onSubmit}){
+function Result({result, top_feature, onSubmit, showDiv, price_to_string}){
   return (
     <div className="box-result">
       <div className="content-result">
         <button onClick={onSubmit}>Xem Kết quả</button>
-
-        {result && (
+        {showDiv && (
+          <div className="loader"></div>
+        )}
+        <div class='box-price'>
+          {result && (
           <>
             <div className="price">
               <strong>Giá dự đoán: </strong> {result}
             </div>
           </>
-        )}       
+          )}    
+
+          {price_to_string && (
+            <>
+              <div className="price-string">{price_to_string}</div>
+            </>
+          )
+
+          }   
+        </div>
+                
       </div>
 
       <div className="box-feature">
         <h3>Top đặc trưng ảnh hưởng:</h3>
-        <div className="top-feature">
-          {top_feature && top_feature.map(([key, val]) => (
-            <div key={key}>{key}: {val.toFixed(4)}</div>
-          ))}
+        <div>
+          <div className="top-feature">
+            {top_feature && top_feature.map(([key, val]) => (
+              <div key={key}>{key}: {val.toFixed(4)}</div>
+            ))}
+          </div>
         </div>
-      </div>
+      </div>       
+    </div>
+  )
+}
+
+function TrustPoint(){
+  return (
+    <div class="danh-gia">
+       <h3>Điểm tin cây:</h3>
+      <div className="box-danh-gia">
+       
+        <div>
+          <div className="top-feature">
+            
+          </div>
+        </div>
+      </div>       
+    </div>
+  )
+}
+
+function DataSet(){
+  return (
+    <div class="danh-gia">
+      <h3>Dữ liệu dataset hiện có:</h3>
+      <div className="box-danh-gia">      
+        <div>
+          <div className="top-feature">
+            
+          </div>
+        </div>
+      </div>       
     </div>
   )
 }
@@ -427,8 +534,10 @@ function App() {
   const [selectedOption, setSelectedOption] = useState(null);
   const [selectedData, setSelectedData] = useState({});
   const [note, setNote] = useState("");
-  const [result, setResult] = useState(null)
-  const [topFeature, setTopFeature] = useState(null)
+  const [result, setResult] = useState(null);
+  const [topFeature, setTopFeature] = useState(null);
+  const [priceToString, setPriceToString] = useState(null);
+  const [showDiv, setShowDiv] = useState(false);
 
   const updateData = (key, value) => {
     setSelectedData((prev) => ({...prev, [key]: value}));
@@ -436,7 +545,14 @@ function App() {
 
   const handleSubmit = async () => {
     try {
-      const response = await fetch('https://bat-dong-san-3.onrender.com/api/du-lieu', {
+      // loader
+      setShowDiv(true);                // Hiện div
+      setTimeout(() => {
+        setShowDiv(false);            // Ẩn sau 2 giây
+      }, 2000);
+  
+      // const response = await fetch('https://bat-dong-san-3.onrender.com/api/du-lieu', {
+      const response = await fetch('http://127.0.0.1:5000/api/du-lieu', {  
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -447,7 +563,8 @@ function App() {
       if (response.ok) {
         const data = await response.json();
         setResult(data.price);
-        setTopFeature(data.top_feature)
+        setTopFeature(data.top_feature);
+        setPriceToString(data.price_to_string);
       } else {
         alert('Gửi thất bại!');
       }
@@ -458,30 +575,48 @@ function App() {
 
   return (
     <div className="app-container">
-      <Header />
-      <MainTitle />
-      <div className="content-area">
+      <div className="left">
         <SidebarNavigation onSelectOption={setSelectedOption}/>
-        <SupportContent
-          selected={selectedOption}
-          updateData={updateData}
-          setNote={setNote}
-        /* {selectedOption && (
-          <SupportContent 
-            selected={selectedOption} 
+      </div>
+
+      <div className="right">
+        <Header />
+
+        <div className="content-area">
+          <SupportContent
+            selected={selectedOption}
             updateData={updateData}
             setNote={setNote}
           />
-          )}      */
-        />
-        <div className="content-box">           
-          <MainContent selectedData={selectedData}/>
-          <Note message={note}/>
-          <Result result={result} top_feature={topFeature} onSubmit={handleSubmit}/>
-        </div>       
+        
+          <div className="big-box">
+            <Title/>  
+
+            <div className="content-box">                  
+              <MainContent selectedData={selectedData}/>
+              <Note message={note}/>
+              <Result 
+                result={result} 
+                top_feature={topFeature} 
+                onSubmit={handleSubmit}
+                showDiv={showDiv}
+                price_to_string={priceToString}
+              />
+            </div>   
+
+            <div className="big-danh-gia">
+              <TrustPoint />
+              <DataSet />
+            </div>
+            
+          </div>
+        
       </div>
     </div>
+      </div>
+      
   );
 }
 
 export default App;
+

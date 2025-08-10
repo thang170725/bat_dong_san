@@ -49,7 +49,7 @@ class Model:
         y = df['gia']
         return X, y
 
-    def train_test_split(self, X, y, test_size=0.2):
+    def train_test_split(self, X, y, test_size=0.3):
         return train_test_split(X, y, test_size=test_size, random_state=42)
 
     def train_model(self, X_train, y_train):
@@ -94,8 +94,97 @@ class Model:
         upper = Q3 + 1.5 * IQR
         return df[(df[column] >= lower) & (df[column] <= upper)]
     
-    def count_value_other(self, df, columns_name):
+    def count_value_other(self, df, columns_name): # trả về các giá trị khác nhau ở một cột nào đó
         return df[columns_name].nunique()
+    
+    def count_values(self, df, columns_name=None):
+        return df[columns_name].value_counts()
+    
+    def unitDigit(self, d):
+        dic = {
+            '0': "không", '1': "một", '2': "hai", '3': "ba", '4': "bốn",
+            '5': "năm", '6': "sáu", '7': "bảy", '8': "tám", '9': "chín"
+        }
+        return dic[d]
+
+    def readThree(self, n, is_first_group=False):
+        n = n.zfill(3)
+        tr, ch, dv = n[0], n[1], n[2]
+        result = ""
+
+        # Nhóm đầu tiên xử lý riêng
+        if is_first_group:
+            if tr != "0":
+                result += self.unitDigit(tr) + " trăm"
+            if ch == "0":
+                if dv != "0" and tr != "0":
+                    result += " linh " + self.unitDigit(dv)
+                elif dv != "0" and tr == "0":
+                    result += self.unitDigit(dv)
+            elif ch == "1":
+                result += " mười"
+                if dv == "1":
+                    result += " một"
+                elif dv == "5":
+                    result += " lăm"
+                elif dv != "0":
+                    result += " " + self.unitDigit(dv)
+            else:
+                result += (" " if result else "") + self.unitDigit(ch) + " mươi"
+                if dv == "1":
+                    result += " mốt"
+                elif dv == "5":
+                    result += " lăm"
+                elif dv != "0":
+                    result += " " + self.unitDigit(dv)
+            return result.strip()
+
+        # Các nhóm khác
+        if tr != "0":
+            result += self.unitDigit(tr) + " trăm"
+        elif ch != "0" or dv != "0":
+            result += " không trăm"
+
+        if ch == "0":
+            if dv != "0":
+                result += " linh " + self.unitDigit(dv)
+        elif ch == "1":
+            result += " mười"
+            if dv == "1":
+                result += " một"
+            elif dv == "5":
+                result += " lăm"
+            elif dv != "0":
+                result += " " + self.unitDigit(dv)
+        else:
+            result += " " + self.unitDigit(ch) + " mươi"
+            if dv == "1":
+                result += " mốt"
+            elif dv == "5":
+                result += " lăm"
+            elif dv != "0":
+                result += " " + self.unitDigit(dv)
+
+        return result.strip()
+
+    def numberToString(self, n):
+        units = ["", " nghìn", " triệu", " tỷ", " nghìn tỷ", " triệu tỷ", " tỷ tỷ"]
+        s = str(int(n))
+        groups = []
+
+        while s:
+            groups.insert(0, s[-3:])
+            s = s[:-3]
+
+        result_parts = []
+        total_groups = len(groups)
+
+        for i, group in enumerate(groups):
+            if group != "000":
+                is_first = (i == 0)
+                result_parts.append(self.readThree(group, is_first) + units[total_groups - i - 1])
+
+        return " ".join(result_parts).strip()
 
 # ================== Dùng thử ==================
 if __name__ == "__main__":
@@ -103,16 +192,17 @@ if __name__ == "__main__":
     df = pd.read_csv('dataset/dataset1.csv')
     df = df.loc[:, ~df.columns.str.contains("^Unnamed")]
     
-    # # 2. Tiền xử  lý
-    # preprocessor = DataPreprocessor()
-    # preprocessor.load(df)
-    # preprocessor.process_mat_tien()
-    # df = preprocessor.get_processed_data()
-    feature_columns = df.columns.tolist()
+    # 2. Tiền xử  lý
+    preprocessor = DataPreprocessor()
+    preprocessor.load(df)
+    preprocessor.process_mat_tien_xgboost()
+    df = preprocessor.get_processed_data()
+    df = df.drop('mat_tien', axis=1)
+    
 
     model = Model()
     X, y = model.ordinal_encode_feature(df)
-
+    feature_columns = X.columns.tolist()
     X_train, X_test, y_train, y_test = model.train_test_split(X, y)
     model.train_model_xgboost(X_train, y_train)
 
@@ -129,16 +219,21 @@ if __name__ == "__main__":
         'loai_nha': 'biet_thu',
         'giay_to_phap_ly': 'hop_dong_mua_ban',
         'vi_tri': 'can_goc',
-        'mat_tien': 30,
         'tinh_trang_nha': 'khac',
         'tang': 2,
         'mo_ta': 'ban_gap',
-#         'mat_tien_numeric': 12,   # Vì không yêu cầu mặt tiền
-#         'mat_tien_khac': 0       # Đánh dấu đây là 'khác'
+        'mat_tien_numeric': 12,   # Vì không yêu cầu mặt tiền
+        'mat_tien_khac': 0       # Đánh dấu đây là 'khác'
         }
     
-    predict_price = model.predict_one(predict_data)
-    print("Dự đoán giá:", predict_price)
+    predict_price = model.predict_one(predict_data)   
+    predict_price = int(predict_price*1_000_000_000)
+    spp = str(predict_price)
+    print(spp, type(spp))
+    formatted_str = "{:,}".format(predict_price)   
+    nts = model.numberToString(spp)
+    print("Dự đoán giá:", formatted_str)
+    print("Giá bằng chữ: ", nts)
 
     top_feature = model.top_features(feature_columns, top_n=5)
     print("top features: ", top_feature)

@@ -4,7 +4,8 @@ from sklearn.preprocessing import OrdinalEncoder
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error, r2_score
 from xgboost import XGBRegressor
-from dataset.data_preprocessor import DataPreprocessor
+# from bat_dong_san.model.data_preprocessor import DataPreprocessor
+from model.data_preprocessor import DataPreprocessor
 
 class ModelV2:
     def __init__(self):
@@ -23,8 +24,8 @@ class ModelV2:
         y = df_encoded['gia']
         return X, y
 
-    def train_test_split(self, X, y, test_size=0.2):
-        return train_test_split(X, y, test_size=test_size, random_state=42)
+    def train_test_split(self, X, y, test_size=0.2, stratify=None):
+        return train_test_split(X, y, test_size=test_size, stratify=stratify, random_state=42)
 
     def train_model(self, X_train, y_train):
         self.model = RandomForestRegressor(random_state=42)
@@ -76,7 +77,7 @@ df = pd.read_csv('dataset/dataset1.csv')
 # 2. Tiền xử  lý
 preprocessor = DataPreprocessor()
 preprocessor.load(df)
-preprocessor.process_mat_tien()
+preprocessor.process_mat_tien_xgboost()
 df = preprocessor.get_processed_data()
 feature_columns = df.columns.tolist()
 
@@ -95,7 +96,8 @@ X['mat_tien_numeric'] = df['mat_tien_numeric']
 X['mat_tien_khac'] = df['mat_tien_khac']
 
 # 5. train/test split
-X_train, X_test, y_train, y_test = model.train_test_split(X, y, test_size=0.2)
+print(X['dia_diem'].value_counts())
+X_train, X_test, y_train, y_test = model.train_test_split(X, y, test_size=0.2, stratify=X['dia_diem'])
 model.train_model_xgboost(X_train, y_train)
 
 # 6. Đánh giá
@@ -106,21 +108,21 @@ print('r2_score: ', r2)
 # 7. Dự đoán 
 predict_data = {
     'dia_diem': 'bac_tu_liem',
-    'so_phong_ngu': 2,
-    'dien_tich': 220,
+    'so_phong_ngu': 5,
+    'dien_tich': 350,
     'loai_nha': 'biet_thu',
-    'giay_to_phap_ly': 'so_do',
+    'giay_to_phap_ly': 'hop_dong_mua_ban',
     'vi_tri': 'can_goc',
     #'mat_tien': 10,
     'tinh_trang_nha': 'moi',
-    'tang': 3,
+    'tang': 2,
     'mo_ta': 'khac',
-    'mat_tien_numeric': 12,   # Vì không yêu cầu mặt tiền
+    'mat_tien_numeric': 20,   # Vì không yêu cầu mặt tiền
     'mat_tien_khac': 0       # Đánh dấu đây là 'khác'
 }
 
 # # Lưu ý: cần thêm thủ công các cột mới vào input
-predict_data['mat_tien_numeric'] = 12
+predict_data['mat_tien_numeric'] = 20
 predict_data['mat_tien_khac'] = 0
 
 predict_price = model.predict_one(predict_data)

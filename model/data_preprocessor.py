@@ -20,7 +20,7 @@ class DataPreprocessor:
 # Test 
 if __name__ == "__main__":
     data = {
-        'mat_tien': [13, "khác"]
+        'mat_tien': [13, "khac", 12, 'khac', 20]
     }
     df = pd.DataFrame(data)
 
